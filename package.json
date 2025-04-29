@@ -2,7 +2,7 @@
   "name": "tsolid",
   "private": false,
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Shotaro Nakamura",
     "url": "https://github.com/nakasyou"
@@ -15,13 +15,13 @@
   "homepage": "https://github.com/nakasyou/tsolid",
   "exports": {
     ".": {
-      "default": "./dist/core/index.js",
-      "import": "./dist/core/index.js",
+      "default": "./dist/core/index.jsx",
+      "import": "./dist/core/index.jsx",
       "types": "./dist/core/index.d.ts"
     },
     "./babel": {
-      "default": "./dist/babel/index.js",
-      "import": "./dist/babel/index.js",
+      "default": "./dist/babel/index.jsx",
+      "import": "./dist/babel/index.jsx",
       "types": "./dist/babel/index.d.ts"
     }
   },
