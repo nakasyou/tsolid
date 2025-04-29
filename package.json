@@ -1,0 +1,44 @@
+{
+  "name": "tsolid",
+  "private": false,
+  "type": "module",
+  "version": "0.1.0",
+  "author": {
+    "name": "Shotaro Nakamura",
+    "url": "https://github.com/nakasyou"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nakasyou/tsolid.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/nakasyou/tsolid",
+  "exports": {
+    ".": {
+      "default": "./dist/core/index.js",
+      "import": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    },
+    "./babel": {
+      "default": "./dist/babel/index.js",
+      "import": "./dist/babel/index.js",
+      "types": "./dist/babel/index.d.ts"
+    }
+  },
+  "dependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/types": "^7.27.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-jsx": "^7.25.9",
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.2.10",
+    "dedent": "^1.5.3",
+    "tsup": "^8.4.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5",
+    "solid-js": "^1.9.5",
+    "vite-plugin-solid": "^2.11.6"
+  }
+}
