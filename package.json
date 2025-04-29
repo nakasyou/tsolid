@@ -2,7 +2,7 @@
   "name": "tsolid",
   "private": false,
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Shotaro Nakamura",
     "url": "https://github.com/nakasyou"
@@ -25,6 +25,7 @@
       "types": "./dist/babel/index.d.ts"
     }
   },
+  "files": ["LICENSE", "README.md", "dist"],
   "dependencies": {
     "@babel/core": "^7.26.10",
     "@babel/types": "^7.27.0"
