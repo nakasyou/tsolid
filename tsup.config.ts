@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['src/core/index.ts', 'src/babel/index.ts'],
-  splitting: true,
+  splitting: false,
   sourcemap: true,
   clean: true,
   dts: true,
@@ -12,7 +12,7 @@ export default defineConfig({
   },
   outExtension(ctx) {
     return {
-      js: `.jsx`
+      js: '.js'
     }
   },
 })

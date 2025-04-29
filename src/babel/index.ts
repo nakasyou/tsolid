@@ -28,11 +28,11 @@ import { getLastMember } from './get-last-member'
 export default function tsolid(opts: {
   /** @default `solid-js` */
   solidPath?: string
-  /** @default `tsolid` */
-  tsolidPath?: string
+  /** @default `tsolid/runtime` */
+  tsolidRuntimePath?: string
 } = {}): PluginItem {
   const solidPath = opts.solidPath ?? 'solid-js'
-  const tsolidPath = opts.tsolidPath ?? 'tsolid'
+  const tsolidPath = opts.tsolidRuntimePath ?? 'tsolid/runtime'
 
   return (): PluginObj => {
     let identifierShow!: t.Identifier

@@ -11,7 +11,7 @@ describe('Short-circuit evaluation', () => {
       }
     `
     const expected = dedent`
-      import { _Map } from "tsolid";
+      import { _Map } from "tsolid/runtime";
       import { Show as _Show } from "solid-js";
       function App() {
         return <div><_Show when={a}><div>v</div></_Show></div>;
@@ -31,7 +31,7 @@ describe('ternary operator', () => {
       }
     `
     const expected = dedent`
-      import { _Map } from "tsolid";
+      import { _Map } from "tsolid/runtime";
       import { Show as _Show } from "solid-js";
       function App() {
         return <div><_Show when={a} fallback={<div>false</div>}><div>true</div></_Show></div>;
@@ -51,7 +51,7 @@ describe('Array', () => {
       }
     `
     const expected = dedent`
-      import { _Map } from "tsolid";
+      import { _Map } from "tsolid/runtime";
       import { Show as _Show } from "solid-js";
       function App() {
         return <div><_Map i={[1, 2, 3]} f={item => <div>{item}</div>} /></div>;

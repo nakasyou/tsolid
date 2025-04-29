@@ -2,10 +2,13 @@
   "name": "tsolid",
   "private": false,
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "author": {
     "name": "Shotaro Nakamura",
     "url": "https://github.com/nakasyou"
+  },
+  "scripts": {
+    "format": "biome check --write"
   },
   "repository": {
     "type": "git",
@@ -23,9 +26,12 @@
       "default": "./dist/babel/index.jsx",
       "import": "./dist/babel/index.jsx",
       "types": "./dist/babel/index.d.ts"
+    },
+    "./runtime": {
+      "default": "./runtime.jsx"
     }
   },
-  "files": ["LICENSE", "README.md", "dist"],
+  "files": ["LICENSE", "README.md", "dist", "runtime.jsx"],
   "dependencies": {
     "@babel/core": "^7.26.10",
     "@babel/types": "^7.27.0"
