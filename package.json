@@ -2,7 +2,7 @@
   "name": "tsolid",
   "private": false,
   "type": "module",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": {
     "name": "Shotaro Nakamura",
     "url": "https://github.com/nakasyou"
@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-jsx": "^7.25.9",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.2.5",
     "@types/bun": "^1.2.10",
     "dedent": "^1.5.3",
     "tsup": "^8.4.0"

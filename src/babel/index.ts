@@ -5,6 +5,7 @@ import SyntaxJSX from '@babel/plugin-syntax-jsx'
 import * as t from '@babel/types'
 import { componentMap, componentShow } from './components'
 import { getLastMember } from './get-last-member'
+import { generate } from '@babel/generator'
 
 /**
  * Babel plugin for providing better development experience with SolidJS.
@@ -25,22 +26,24 @@ import { getLastMember } from './get-last-member'
  *   ]
  * })
  */
-export default function tsolid(opts: {
-  /** @default `solid-js` */
-  solidPath?: string
-  /** @default `tsolid/runtime` */
-  tsolidRuntimePath?: string
-} = {}): PluginItem {
+export default function tsolid(
+  opts: {
+    /** @default `solid-js` */
+    solidPath?: string
+    /** @default `tsolid/runtime` */
+    tsolidRuntimePath?: string
+  } = {},
+): PluginItem {
   const solidPath = opts.solidPath ?? 'solid-js'
   const tsolidPath = opts.tsolidRuntimePath ?? 'tsolid/runtime'
 
-  return (): PluginObj => {
+  return function pluginTsolid(): PluginObj {
     let identifierShow!: t.Identifier
     let identifierMap!: t.Identifier
 
     return {
       name: 'babel-plugin-better-solid',
-      inherits: SyntaxJSX,
+      inherits: typeof SyntaxJSX === 'function' ? SyntaxJSX : SyntaxJSX.default,
       visitor: {
         Program: {
           enter(path) {
@@ -58,74 +61,82 @@ export default function tsolid(opts: {
                 t.stringLiteral(tsolidPath),
               ),
             )
-          },
-        },
-        JSXExpressionContainer: {
-          enter(path) {
             path.traverse({
-              LogicalExpression: {
+              JSXExpressionContainer: {
                 enter(path) {
-                  let elem: t.JSXElement | undefined
-                  switch (path.node.operator) {
-                    case '&&': {
-                      const { left, right } = path.node
-                      elem = componentShow(identifierShow, left, right)
-                      break
-                    }
-                  }
-                  if (!elem) {
-                    return
-                  }
-                  if (path.parentPath.isJSXExpressionContainer()) {
-                    path.parentPath.replaceWith(elem)
-                  } else {
-                    path.replaceWith(elem)
-                  }
+                  path.traverse({
+                    LogicalExpression: {
+                      enter(path) {
+                        let elem: t.JSXElement | undefined
+                        switch (path.node.operator) {
+                          case '&&': {
+                            const { left, right } = path.node
+                            elem = componentShow(identifierShow, left, right)
+                            break
+                          }
+                        }
+                        if (!elem) {
+                          return
+                        }
+                        if (path.parentPath.isJSXExpressionContainer()) {
+                          path.parentPath.replaceWith(elem)
+                        } else {
+                          path.replaceWith(elem)
+                        }
+                        path.skip()
+                      },
+                    },
+                    ConditionalExpression(path) {
+                      const { test, consequent, alternate } = path.node
+                      const elem = componentShow(
+                        identifierShow,
+                        test,
+                        consequent,
+                        alternate as t.JSXElement | t.JSXFragment,
+                      )
+                      if (path.parentPath.isJSXExpressionContainer()) {
+                        path.parentPath.replaceWith(elem)
+                      } else {
+                        path.replaceWith(elem)
+                      }
+                    },
+                    CallExpression(path) {
+                      if (
+                        path.node.callee.type === 'MemberExpression' &&
+                        getLastMember(path.node.callee) === 'map' &&
+                        path.node.arguments[0] &&
+                        t.isExpression(path.node.arguments[0])
+                      ) {
+                        ;(path.parentPath.isJSXExpressionContainer()
+                          ? path.parentPath
+                          : path
+                        ).replaceWith(
+                          componentMap(
+                            identifierMap,
+                            path.node.callee.object,
+                            path.node.arguments[0],
+                          ),
+                        )
+                      }
+                      path.skip()
+                    },
+                    BinaryExpression(path) {
+                      path.skip()
+                    },
+                    JSXElement(path) {
+                      path.skip()
+                    },
+                    JSXFragment(path) {
+                      path.skip()
+                    },
+                    BlockStatement(path) {
+                      path.skip()
+                    },
+                    ArrowFunctionExpression(path) {
+                      path.skip()
+                    },
+                  })
                 },
-              },
-              ConditionalExpression(path) {
-                const { test, consequent, alternate } = path.node
-                const elem = componentShow(
-                  identifierShow,
-                  test,
-                  consequent,
-                  alternate as t.JSXElement | t.JSXFragment,
-                )
-                if (path.parentPath.isJSXExpressionContainer()) {
-                  path.parentPath.replaceWith(elem)
-                } else {
-                  path.replaceWith(elem)
-                }
-              },
-              CallExpression(path) {
-                if (
-                  path.node.callee.type === 'MemberExpression'
-                  && getLastMember(path.node.callee) === 'map'
-                  && path.node.arguments[0]
-                  && t.isExpression(path.node.arguments[0])
-                ) {
-                  (path.parentPath.isJSXExpressionContainer() ? path.parentPath : path).replaceWith(componentMap(
-                    identifierMap,
-                    path.node.callee.object,
-                    path.node.arguments[0],
-                  ))
-                }
-                path.skip()
-              },
-              BinaryExpression(path) {
-                path.skip()
-              },
-              JSXElement(path) {
-                path.skip()
-              },
-              JSXFragment(path) {
-                path.skip()
-              },
-              BlockStatement(path) {
-                path.skip()
-              },
-              ArrowFunctionExpression(path) {
-                path.skip()
               },
             })
           },
