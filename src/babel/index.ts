@@ -1,11 +1,24 @@
-import solid, { type Options } from 'vite-plugin-solid'
 import type { PluginItem, PluginObj } from '@babel/core'
-// @ts-ignore
-import SyntaxJSX from '@babel/plugin-syntax-jsx'
+// @ts-expect-error Type definition missing
+import * as SyntaxJSX from '@babel/plugin-syntax-jsx'
 import * as t from '@babel/types'
 import { componentMap, componentShow } from './components'
 import { getLastMember } from './get-last-member'
-import { generate } from '@babel/generator'
+
+const getSyntaxJSXPlugin = (): PluginItem => {
+  // biome-ignore lint/suspicious/noExplicitAny: too complicated
+  let plugin: any = SyntaxJSX
+  while (true) {
+    if (typeof plugin === 'function') {
+      break
+    }
+    if (!plugin) {
+      throw new Error('Could not find JSX syntax plugin')
+    }
+    plugin = plugin.default
+  }
+  return plugin
+}
 
 /**
  * Babel plugin for providing better development experience with SolidJS.
@@ -43,7 +56,7 @@ export default function tsolid(
 
     return {
       name: 'babel-plugin-better-solid',
-      inherits: typeof SyntaxJSX === 'function' ? SyntaxJSX : SyntaxJSX.default,
+      inherits: getSyntaxJSXPlugin(),
       visitor: {
         Program: {
           enter(path) {
