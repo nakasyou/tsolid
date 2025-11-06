@@ -1,24 +1,27 @@
-import type { PluginItem, PluginObj } from '@babel/core'
+import type { NodePath, PluginItem, PluginObj } from "@babel/core";
 // @ts-expect-error Type definition missing
-import * as SyntaxJSX from '@babel/plugin-syntax-jsx'
-import * as t from '@babel/types'
-import { componentMap, componentShow } from './components'
-import { getLastMember } from './get-last-member'
+import * as SyntaxJSX from "@babel/plugin-syntax-jsx";
+import * as t from "@babel/types";
+import { componentMap, componentShow } from "./components";
+import { getLastMember } from "./get-last-member";
 
 const getSyntaxJSXPlugin = (): PluginItem => {
-  // biome-ignore lint/suspicious/noExplicitAny: too complicated
-  let plugin: any = SyntaxJSX
-  while (true) {
-    if (typeof plugin === 'function') {
-      break
-    }
-    if (!plugin) {
-      throw new Error('Could not find JSX syntax plugin')
-    }
-    plugin = plugin.default
-  }
-  return plugin
-}
+	// biome-ignore lint/suspicious/noExplicitAny: too complicated
+	let plugin: any = SyntaxJSX;
+	while (true) {
+		if (typeof plugin === "function") {
+			break;
+		}
+		if (!plugin) {
+			throw new Error("Could not find JSX syntax plugin");
+		}
+		plugin = plugin.default;
+	}
+	return plugin;
+};
+
+const shouldSkip = (path: NodePath) =>
+	!!path.findParent((parent) => parent.isJSXAttribute());
 
 /**
  * Babel plugin for providing better development experience with SolidJS.
@@ -40,121 +43,133 @@ const getSyntaxJSXPlugin = (): PluginItem => {
  * })
  */
 export default function tsolid(
-  opts: {
-    /** @default `solid-js` */
-    solidPath?: string
-    /** @default `tsolid/runtime` */
-    tsolidRuntimePath?: string
-  } = {},
+	opts: {
+		/** @default `solid-js` */
+		solidPath?: string;
+		/** @default `tsolid/runtime` */
+		tsolidRuntimePath?: string;
+	} = {},
 ): PluginItem {
-  const solidPath = opts.solidPath ?? 'solid-js'
-  const tsolidPath = opts.tsolidRuntimePath ?? 'tsolid/runtime'
+	const solidPath = opts.solidPath ?? "solid-js";
+	const tsolidPath = opts.tsolidRuntimePath ?? "tsolid/runtime";
 
-  return function pluginTsolid(): PluginObj {
-    let identifierShow!: t.Identifier
-    let identifierMap!: t.Identifier
+	return function pluginTsolid(): PluginObj {
+		let identifierShow!: t.Identifier;
+		let identifierMap!: t.Identifier;
 
-    return {
-      name: 'babel-plugin-better-solid',
-      inherits: getSyntaxJSXPlugin(),
-      visitor: {
-        Program: {
-          enter(path) {
-            identifierShow = path.scope.generateUidIdentifier('Show')
-            path.node.body.unshift(
-              t.importDeclaration(
-                [t.importSpecifier(identifierShow, t.identifier('Show'))],
-                t.stringLiteral(solidPath),
-              ),
-            )
-            identifierMap = path.scope.generateUidIdentifier('Map')
-            path.node.body.unshift(
-              t.importDeclaration(
-                [t.importSpecifier(identifierMap, t.identifier('_Map'))],
-                t.stringLiteral(tsolidPath),
-              ),
-            )
-            path.traverse({
-              JSXExpressionContainer: {
-                enter(path) {
-                  path.traverse({
-                    LogicalExpression: {
-                      enter(path) {
-                        let elem: t.JSXElement | undefined
-                        switch (path.node.operator) {
-                          case '&&': {
-                            const { left, right } = path.node
-                            elem = componentShow(identifierShow, left, right)
-                            break
-                          }
-                        }
-                        if (!elem) {
-                          return
-                        }
-                        if (path.parentPath.isJSXExpressionContainer()) {
-                          path.parentPath.replaceWith(elem)
-                        } else {
-                          path.replaceWith(elem)
-                        }
-                        path.skip()
-                      },
-                    },
-                    ConditionalExpression(path) {
-                      const { test, consequent, alternate } = path.node
-                      const elem = componentShow(
-                        identifierShow,
-                        test,
-                        consequent,
-                        alternate as t.JSXElement | t.JSXFragment,
-                      )
-                      if (path.parentPath.isJSXExpressionContainer()) {
-                        path.parentPath.replaceWith(elem)
-                      } else {
-                        path.replaceWith(elem)
-                      }
-                    },
-                    CallExpression(path) {
-                      if (
-                        path.node.callee.type === 'MemberExpression' &&
-                        getLastMember(path.node.callee) === 'map' &&
-                        path.node.arguments[0] &&
-                        t.isExpression(path.node.arguments[0])
-                      ) {
-                        ;(path.parentPath.isJSXExpressionContainer()
-                          ? path.parentPath
-                          : path
-                        ).replaceWith(
-                          componentMap(
-                            identifierMap,
-                            path.node.callee.object,
-                            path.node.arguments[0],
-                          ),
-                        )
-                      }
-                      path.skip()
-                    },
-                    BinaryExpression(path) {
-                      path.skip()
-                    },
-                    JSXElement(path) {
-                      path.skip()
-                    },
-                    JSXFragment(path) {
-                      path.skip()
-                    },
-                    BlockStatement(path) {
-                      path.skip()
-                    },
-                    ArrowFunctionExpression(path) {
-                      path.skip()
-                    },
-                  })
-                },
-              },
-            })
-          },
-        },
-      },
-    }
-  }
+		return {
+			name: "babel-plugin-better-solid",
+			inherits: getSyntaxJSXPlugin(),
+			visitor: {
+				Program: {
+					enter(path) {
+						identifierShow = path.scope.generateUidIdentifier("Show");
+						path.node.body.unshift(
+							t.importDeclaration(
+								[t.importSpecifier(identifierShow, t.identifier("Show"))],
+								t.stringLiteral(solidPath),
+							),
+						);
+						identifierMap = path.scope.generateUidIdentifier("Map");
+						path.node.body.unshift(
+							t.importDeclaration(
+								[t.importSpecifier(identifierMap, t.identifier("_Map"))],
+								t.stringLiteral(tsolidPath),
+							),
+						);
+						path.traverse({
+							JSXExpressionContainer: {
+								enter(path) {
+									path.traverse({
+										LogicalExpression: {
+											enter(path) {
+												if (shouldSkip(path)) return;
+												let elem: t.JSXElement | undefined;
+												switch (path.node.operator) {
+													case "&&": {
+														const { left, right } = path.node;
+														elem = componentShow(identifierShow, left, right);
+														break;
+													}
+												}
+												if (!elem) {
+													return;
+												}
+												if (path.parentPath.isJSXExpressionContainer()) {
+													path.parentPath.replaceWith(elem);
+												} else {
+													path.replaceWith(elem);
+												}
+												path.skip();
+											},
+										},
+										ConditionalExpression(path) {
+											if (shouldSkip(path)) return;
+											const { test, consequent, alternate } = path.node;
+											const elem = componentShow(
+												identifierShow,
+												test,
+												consequent,
+												alternate as t.JSXElement | t.JSXFragment,
+											);
+											if (path.parentPath.isJSXExpressionContainer()) {
+												path.parentPath.replaceWith(elem);
+											} else {
+												path.replaceWith(elem);
+											}
+										},
+										CallExpression(path) {
+											if (
+												path.node.callee.type === "MemberExpression" &&
+												getLastMember(path.node.callee) === "map" &&
+												path.node.arguments[0] &&
+												t.isExpression(path.node.arguments[0])
+											) {
+												if (shouldSkip(path)) return;
+												(path.parentPath.isJSXExpressionContainer()
+													? path.parentPath
+													: path
+												).replaceWith(
+													componentMap(
+														identifierMap,
+														path.node.callee.object,
+														path.node.arguments[0],
+													),
+												);
+											}
+											path.skip();
+										},
+										BinaryExpression(path) {
+											path.skip();
+										},
+										JSXElement(path) {
+											path.skip();
+										},
+										JSXOpeningElement(path) {
+											path.skip();
+										},
+										JSXOpeningFragment(path) {
+											path.skip();
+										},
+										JSXFragment(path) {
+											path.skip();
+										},
+										BlockStatement(path) {
+											path.skip();
+										},
+										ArrowFunctionExpression(path) {
+											path.skip();
+										},
+										JSXAttribute(path) {
+											path.skip();
+										},
+									});
+								},
+							},
+						});
+					},
+				},
+			},
+		};
+	};
 }
