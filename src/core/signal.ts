@@ -1,14 +1,24 @@
 import { type Accessor, createMemo, createSignal } from 'solid-js'
 
+/**
+ * A signal optimized for TypeScript usage.
+ */
 export interface Signal<T> {
   v: T
 }
+/**
+ * A readonly signal optimized for TypeScript usage.
+ */
 export interface ReadonlySignal<T> {
   readonly v: T
 }
-export function signal<T>(): Signal<T | undefined>
-export function signal<T>(value: T): Signal<T>
-export function signal<T>(value?: T): Signal<T | undefined> {
+
+/**
+ * Create a signal optimized for TypeScript usage.
+ */
+export function tsignal<T>(): Signal<T | undefined>
+export function tsignal<T>(value: T): Signal<T>
+export function tsignal<T>(value?: T): Signal<T | undefined> {
   const [getter, setter] = createSignal<T>(value as T)
 
   return {
@@ -21,11 +31,31 @@ export function signal<T>(value?: T): Signal<T | undefined> {
   }
 }
 
+/**
+ * Create a readonly signal from an Solid.js's accessor.
+ * @param ac The accessor function.
+ * @returns A readonly signal.
+ */
 export const fromAccessor = <T>(ac: Accessor<T>): ReadonlySignal<T> => ({
   get v() {
     return ac()
   },
 })
 
-export const memo = <T>(fn: () => T): ReadonlySignal<T> =>
+/**
+ * Create a memoized readonly signal for TypeScript usage.
+ * @param fn The function to memoize.
+ * @returns A readonly memoized signal.
+ */
+export const tmemo = <T>(fn: () => T): ReadonlySignal<T> =>
   fromAccessor(createMemo(fn))
+
+/**
+ * @deprecated Use `tsignal` instead.
+ */
+export const signal = tsignal
+
+/**
+ * @deprecated Use `tmemo` instead.
+ */
+export const memo = tmemo

@@ -1,8 +1,8 @@
 import { render } from 'solid-js/web'
-import { signal } from '../src/core'
+import { tsignal } from '../src/core'
 
 const App = () => {
-  const s = signal([0, 1, 2])
+  const s = tsignal([0, 1, 2])
   return (
     <div>
       {s.v.map((v) => (
