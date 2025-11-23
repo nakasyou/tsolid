@@ -24,10 +24,10 @@ This library provides a way to write JSX like React, but still compiled code is 
 
 For instance, you can write a code like this:
 ```tsx
-import { signal } from 'tsolid'
+import { tsignal } from 'tsolid'
 
 const App = () => {
-  const value = signal<string | number>('Hello World')
+  const value = tsignal<string | number>('Hello World')
   return (
     <>
       {typeof value() === 'string' && <div>{value().toUpperCase()}</div>}
@@ -37,11 +37,11 @@ const App = () => {
 ```
 This code will be compiled to:
 ```jsx
-import { signal } from 'tsolid'
+import { tsignal } from 'tsolid'
 import { Show } from 'solid-js'
 
 const App = () => {
-  const value = signal<string | number>('Hello World')
+  const value = tsignal<string | number>('Hello World')
   return (
     <>
       <Show when={typeof value.v === 'string'}>
@@ -63,10 +63,10 @@ if (value() === null) {
 ```
 This is because getting signal value is a function, so TypeScript cannot infer the type of `value` correctly.
 
-So, tsolid provides a better signal API, `signal`, which can get value by getter/setter using `v`.
+So, tsolid provides a better signal API, `tsignal`, which can get value by getter/setter using `v`.
 ```ts
-import { signal } from 'tsolid'
-const value = signal<string | null>('Hello World')
+import { tsignal } from 'tsolid'
+const value = tsignal<string | null>('Hello World')
 if (value.v === null) {
   // OK
   value.v.toUpperCase()
