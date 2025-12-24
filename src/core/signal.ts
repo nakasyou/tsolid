@@ -3,9 +3,15 @@ import { type Accessor, createMemo, createSignal } from 'solid-js'
 /**
  * A signal optimized for TypeScript usage.
  */
-export interface Signal<T> {
+export interface TSignal<T> {
   v: T
 }
+
+/**
+ * @deprecated Use `TSignal` instead.
+ */
+export type Signal<T> = TSignal<T>
+
 /**
  * A readonly signal optimized for TypeScript usage.
  */
@@ -16,9 +22,9 @@ export interface ReadonlySignal<T> {
 /**
  * Create a signal optimized for TypeScript usage.
  */
-export function tsignal<T>(): Signal<T | undefined>
-export function tsignal<T>(value: T): Signal<T>
-export function tsignal<T>(value?: T): Signal<T | undefined> {
+export function tsignal<T>(): TSignal<T | undefined>
+export function tsignal<T>(value: T): TSignal<T>
+export function tsignal<T>(value?: T): TSignal<T | undefined> {
   const [getter, setter] = createSignal<T>(value as T)
 
   return {
